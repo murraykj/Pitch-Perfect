@@ -22,12 +22,12 @@ class PlaySoundsViewController: UIViewController {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view
-        audioPlayer = AVAudioPlayer(contentsOfURL: receivedAudio.filePathUrl, error: nil)
+        audioPlayer = try? AVAudioPlayer(contentsOfURL: receivedAudio.filePathUrl)
         audioPlayer.enableRate=true
         
         // Create object of AVAudioEngine
         audioEngine = AVAudioEngine()
-        audioFile = AVAudioFile(forReading: receivedAudio.filePathUrl, error: nil)
+        audioFile = try? AVAudioFile(forReading: receivedAudio.filePathUrl)
     }
 
     override func didReceiveMemoryWarning() {
@@ -77,13 +77,13 @@ class PlaySoundsViewController: UIViewController {
         stopAllAudio()
         
         // Create instance of AVAudioPlayerNode; this is connected to mp3 player and will play sound
-        var audioPlayerNode = AVAudioPlayerNode()
+        let audioPlayerNode = AVAudioPlayerNode()
         
         // Attach AVAudioPlayerNode to AVAudioEngine
         audioEngine.attachNode(audioPlayerNode)
         
         // Create AVAudioUnitTimePitch
-        var changePitchEffect = AVAudioUnitTimePitch()
+        let changePitchEffect = AVAudioUnitTimePitch()
         changePitchEffect.pitch = pitch
         
         // Attach AVAudioUnitTimePitch to AVAudioEngine
@@ -95,7 +95,10 @@ class PlaySoundsViewController: UIViewController {
         
         // Attach AVAudioUnitTimePitch to some type of output like the speakers
         audioPlayerNode.scheduleFile(audioFile, atTime: nil, completionHandler: nil)
-        audioEngine.startAndReturnError(nil)
+        do {
+            try audioEngine.start()
+        } catch _ {
+        }
         
         // Play audio
         audioPlayerNode.play()
